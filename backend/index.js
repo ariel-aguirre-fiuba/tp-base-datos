@@ -72,7 +72,7 @@ app.post(`${PREFIX}/transacciones/deposito`, async (req, res) => {
     return;
   }
   const queryResponse = await client.query(
-    "INSERT INTO Transaccion (monto, tipo_transaccion, fecha_hora, id_cuenta_origen, id_cuenta_destino) VALUES ($1, 'Deposito', NOW(), $2, NULL)",
+    "INSERT INTO Transaccion (monto, tipo_transaccion, id_cuenta_origen, id_cuenta_destino) VALUES ($1, 'Deposito', $2, NULL)",
     [monto, idCuentaDestino]
   );
   await client.query(
@@ -90,7 +90,7 @@ app.post(`${PREFIX}/transacciones/retiro`, async (req, res) => {
     return;
   }
   const queryResponse = await client.query(
-    "INSERT INTO Transaccion (monto, tipo_transaccion, fecha_hora, id_cuenta_origen, id_cuenta_destino) VALUES ($1, 'Retiro', NOW(), $2, NULL)",
+    "INSERT INTO Transaccion (monto, tipo_transaccion, id_cuenta_origen, id_cuenta_destino) VALUES ($1, 'Retiro', $2, NULL)",
     [monto, idCuentaOrigen]
   );
   await client.query(
@@ -108,7 +108,7 @@ app.post(`${PREFIX}/transacciones/transferencia`, async (req, res) => {
     return;
   }
   const queryResponse = await client.query(
-    "INSERT INTO Transaccion (monto, tipo_transaccion, fecha_hora, id_cuenta_origen, id_cuenta_destino) VALUES ($1, 'Transferencia', NOW(), $2, $3)",
+    "INSERT INTO Transaccion (monto, tipo_transaccion, id_cuenta_origen, id_cuenta_destino) VALUES ($1, 'Transferencia', $2, $3)",
     [monto, idCuentaOrigen, idCuentaDestino]
   );
   await client.query(

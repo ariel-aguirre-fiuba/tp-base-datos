@@ -36,7 +36,7 @@ CREATE TABLE Transaccion (
     id_transaccion SERIAL PRIMARY KEY,
     monto DECIMAL(12,2) NOT NULL CHECK (monto > 0.00), -- Monto no puede ser nulo y debe ser positivo
     tipo_transaccion VARCHAR(20) CHECK (tipo_transaccion IN ('Deposito', 'Retiro', 'Transferencia')), -- Restricción de tipos de transacción
-    fecha_hora DATE NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de la transacción, por defecto la actual
+    fecha_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de la transacción, por defecto la actual
     id_cuenta_origen INT NOT NULL, -- Cuenta desde donde sale el dinero (o a la que se deposita/retira)
     id_cuenta_destino INT, -- Cuenta a la que llega el dinero (NULL para depósitos/retiros)
     FOREIGN KEY (id_cuenta_origen) REFERENCES Cuenta (id_cuenta),

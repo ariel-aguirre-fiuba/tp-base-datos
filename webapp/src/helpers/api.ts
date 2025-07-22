@@ -78,8 +78,8 @@ export const registerUser = async (
 
 export const transfer = async (
   monto: number,
-  idCuentaOrigen: string,
-  idCuentaDestino: string
+  idCuentaOrigen: number,
+  idCuentaDestino: number
 ) => {
   try {
     const response = await fetch(`${url}/transacciones/transferencia`, {

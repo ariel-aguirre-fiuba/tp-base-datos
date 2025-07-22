@@ -2,14 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { Account, Transaction } from "../types/banking";
 import { useAuth } from "./AuthContext";
 import { getAccounts, getTransactions, transfer } from "@/helpers/api";
+import { parseTransferType } from "@/helpers/parsers";
 
 interface BankingContextType {
   accounts: Account[];
   transactions: Transaction[];
   createAccount: (type: "checking" | "savings", name: string) => void;
   transferMoney: (
-    fromAccountId: string,
-    toAccountId: string,
+    fromAccountId: number,
+    toAccountId: number,
     amount: number,
     description: string
   ) => Promise<boolean>;
@@ -32,7 +33,7 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
         const accountsData =
           accounts?.map((acc: any) => ({
             id: acc.id_cuenta,
-            type: acc.tipo_cuenta, // TODO Parsing
+            type: acc.tipo_cuenta === "Ahorro" ? "savings" : "checking",
             balance: parseFloat(acc.saldo),
             accountNumber: acc.numero_cuenta,
             name: acc.numero_cuenta,
@@ -45,10 +46,11 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
           txs?.map((tx: any) => ({
             id: tx.id_transaccion,
             amount: tx.monto,
-            type: tx.tipo_transaccion, // TODO Parsing
+            type: parseTransferType(tx.tipo_transaccion),
             timestamp: new Date(tx.fecha_hora),
             fromAccountId: tx.cuenta_origen_numero,
             toAccountId: tx.cuenta_destino_numero,
+            description: tx.tipo_transaccion,
           })) || [];
 
         setTransactions(transactionsData);
@@ -77,8 +79,8 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const transferMoney = async (
-    fromAccountId: string,
-    toAccountId: string,
+    fromAccountId: number,
+    toAccountId: number,
     amount: number,
     description: string
   ) => {
@@ -91,10 +93,10 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
     // Update account balances
     setAccounts((prev) =>
       prev.map((acc) => {
-        if (acc.id === fromAccountId) {
+        if (acc.id === fromAccountId.toString()) {
           return { ...acc, balance: acc.balance - amount };
         }
-        if (acc.id === toAccountId) {
+        if (acc.id === toAccountId.toString()) {
           return { ...acc, balance: acc.balance + amount };
         }
         return acc;
@@ -104,8 +106,8 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
     // Create transaction record
     const newTransaction: Transaction = {
       id: `tx${Date.now()}`,
-      fromAccountId,
-      toAccountId,
+      fromAccountId: fromAccountId.toString(),
+      toAccountId: toAccountId.toString(),
       amount,
       description,
       timestamp: new Date(),

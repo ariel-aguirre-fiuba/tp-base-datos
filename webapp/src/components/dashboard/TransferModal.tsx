@@ -35,8 +35,8 @@ const TransferModal: React.FC<TransferModalProps> = ({
   accounts,
   selectedAccountId,
 }) => {
-  const [fromAccountId, setFromAccountId] = useState(selectedAccountId || "");
-  const [toAccountId, setToAccountId] = useState("");
+  const [fromAccountId, setFromAccountId] = useState<number | null>();
+  const [toAccountId, setToAccountId] = useState<number | null>();
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
@@ -70,7 +70,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
       return;
     }
 
-    const fromAccount = accounts.find((acc: any) => acc.id === +fromAccountId);
+    const fromAccount = accounts.find((acc: any) => acc.id === fromAccountId);
     if (!fromAccount || fromAccount.balance < amountNum) {
       setError("Saldo insuficiente");
       return;
@@ -92,8 +92,8 @@ const TransferModal: React.FC<TransferModalProps> = ({
       });
 
       // Reset form
-      setFromAccountId("");
-      setToAccountId("");
+      setFromAccountId(null);
+      setToAccountId(null);
       setAmount("");
       setDescription("");
       onClose();
@@ -127,7 +127,10 @@ const TransferModal: React.FC<TransferModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="fromAccount">Cuenta origen</Label>
-            <Select value={fromAccountId} onValueChange={setFromAccountId}>
+            <Select
+              value={fromAccountId}
+              onValueChange={(accountId) => setFromAccountId(+accountId)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona cuenta origen" />
               </SelectTrigger>
@@ -149,7 +152,10 @@ const TransferModal: React.FC<TransferModalProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="toAccount">Cuenta destino</Label>
-            <Select value={toAccountId} onValueChange={setToAccountId}>
+            <Select
+              value={toAccountId}
+              onValueChange={(accountId) => setToAccountId(+accountId)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona cuenta destino" />
               </SelectTrigger>
