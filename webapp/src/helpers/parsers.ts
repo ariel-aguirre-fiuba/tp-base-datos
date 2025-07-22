@@ -1,4 +1,4 @@
-export const parseTransferType = (dbType: string) => {
+export const parseTransferTypeFromDb = (dbType: string) => {
   if (dbType === "Retiro") {
     return "withdrawal";
   }

@@ -1,13 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Account, Transaction } from "../types/banking";
 import { useAuth } from "./AuthContext";
-import { getAccounts, getTransactions, transfer } from "@/helpers/api";
-import { parseTransferType } from "@/helpers/parsers";
+import {
+  createAcc,
+  getAccounts,
+  getAllAccounts,
+  getTransactions,
+  transfer,
+} from "@/helpers/api";
+import { parseTransferTypeFromDb } from "@/helpers/parsers";
 
 interface BankingContextType {
   accounts: Account[];
+  allAccounts: Account[];
   transactions: Transaction[];
-  createAccount: (type: "checking" | "savings", name: string) => void;
+  createAccount: (type: "checking" | "savings", name: string) => Promise<void>;
   transferMoney: (
     fromAccountId: number,
     toAccountId: number,
@@ -23,6 +30,7 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user } = useAuth();
+  const [allAccounts, setAllAccounts] = useState<Account[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
@@ -46,7 +54,7 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
           txs?.map((tx: any) => ({
             id: tx.id_transaccion,
             amount: tx.monto,
-            type: parseTransferType(tx.tipo_transaccion),
+            type: parseTransferTypeFromDb(tx.tipo_transaccion),
             timestamp: new Date(tx.fecha_hora),
             fromAccountId: tx.cuenta_origen_numero,
             toAccountId: tx.cuenta_destino_numero,
@@ -55,13 +63,26 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
 
         setTransactions(transactionsData);
       });
+
+      getAllAccounts().then((accounts) => {
+        const accountsData =
+          accounts?.map((acc: any) => ({
+            id: acc.id_cuenta,
+            type: acc.tipo_cuenta === "Ahorro" ? "savings" : "checking",
+            balance: parseFloat(acc.saldo),
+            accountNumber: acc.numero_cuenta,
+            name: acc.numero_cuenta,
+          })) || [];
+        setAllAccounts(accountsData);
+      });
     } else {
       setAccounts([]);
       setTransactions([]);
+      setAllAccounts([]);
     }
   }, [user]);
 
-  const createAccount = (type: "checking" | "savings", name: string) => {
+  const createAccount = async (type: "checking" | "savings", name: string) => {
     if (!user) return;
 
     const newAccount: Account = {
@@ -74,7 +95,15 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
         .slice(-4)}-${Math.floor(Math.random() * 10000)}`,
       name,
     };
+    const response = await createAcc(
+      newAccount.accountNumber,
+      newAccount.type === "checking" ? "Corriente" : "Ahorro",
+      user.id
+    );
 
+    if (!response) {
+      return false;
+    }
     setAccounts((prev) => [...prev, newAccount]);
   };
 
@@ -134,6 +163,7 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
     <BankingContext.Provider
       value={{
         accounts,
+        allAccounts,
         transactions,
         createAccount,
         transferMoney,

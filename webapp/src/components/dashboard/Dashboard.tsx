@@ -12,7 +12,7 @@ import { useBanking } from "../../contexts/BankingContext";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const { accounts, transactions } = useBanking();
+  const { accounts, transactions, allAccounts } = useBanking();
   const [showBalance, setShowBalance] = useState(true);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
@@ -142,6 +142,7 @@ const Dashboard: React.FC = () => {
           setSelectedAccountId("");
         }}
         accounts={accounts}
+        allAccounts={allAccounts}
         selectedAccountId={selectedAccountId}
       />
     </SidebarProvider>

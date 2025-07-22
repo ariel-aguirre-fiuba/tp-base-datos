@@ -35,7 +35,7 @@ app.post(`${PREFIX}/usuarios`, async (req, res) => {
   const mockTelefono = "1234-9876";
   const mockFechaNacimiento = "2025-07-23";
 
-  const queryResponse = await client.query(
+  await client.query(
     "INSERT INTO Usuario (nombre, apellido, dni, direccion, telefono, email, fecha_nacimiento) VALUES ($1, $2, $3, $4, $5, $6, $7)",
     [
       nombre,
@@ -46,6 +46,10 @@ app.post(`${PREFIX}/usuarios`, async (req, res) => {
       email,
       mockFechaNacimiento,
     ]
+  );
+  const queryResponse = await client.query(
+    "SELECT id_usuario, nombre, apellido, dni, direccion, telefono, email, fecha_nacimiento FROM Usuario WHERE email = $1",
+    [email]
   );
   res.status(200).send(queryResponse.rows);
 });
@@ -58,7 +62,7 @@ app.post(`${PREFIX}/cuentas`, async (req, res) => {
     return;
   }
   const queryResponse = await client.query(
-    "INSERT INTO Cuenta (numero_cuenta, tipo_cuenta, saldo, fecha_apertura, id_usuario) VALUES ($1, $2, 0.00, CURDATE(), $3)",
+    "INSERT INTO Cuenta (numero_cuenta, tipo_cuenta, saldo, fecha_apertura, id_usuario) VALUES ($1, $2, 0.00, NOW(), $3)",
     [numeroCuenta, tipoCuenta, idUsuario]
   );
   res.status(200).send(queryResponse.rows);
@@ -159,6 +163,18 @@ app.get(`${PREFIX}/usuarios/:id/cuentas`, async (req, res) => {
   );
   if (queryResponse.rows.length < 1) {
     res.status(404).send("Cuentas o usuario no encontrados");
+    return;
+  }
+  res.status(200).send(queryResponse.rows);
+});
+
+// Obtener todas las cuentas
+app.get(`${PREFIX}/cuentas`, async (req, res) => {
+  const queryResponse = await client.query(
+    "SELECT id_cuenta, numero_cuenta, tipo_cuenta, saldo, fecha_apertura FROM Cuenta"
+  );
+  if (queryResponse.rows.length < 1) {
+    res.status(404).send("Cuentas no encontradas");
     return;
   }
   res.status(200).send(queryResponse.rows);

@@ -12,8 +12,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useBanking } from "../contexts/BankingContext";
 
 const Accounts: React.FC = () => {
-  const { user } = useAuth();
-  const { accounts } = useBanking();
+  const { accounts, allAccounts } = useBanking();
   const [showBalance, setShowBalance] = useState(true);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] =
@@ -200,6 +199,7 @@ const Accounts: React.FC = () => {
           setSelectedAccountId("");
         }}
         accounts={accounts}
+        allAccounts={allAccounts}
         selectedAccountId={selectedAccountId}
       />
 

@@ -26,6 +26,7 @@ interface TransferModalProps {
   isOpen: boolean;
   onClose: () => void;
   accounts: Account[];
+  allAccounts: Account[];
   selectedAccountId?: string;
 }
 
@@ -33,6 +34,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
   isOpen,
   onClose,
   accounts,
+  allAccounts,
   selectedAccountId,
 }) => {
   const [fromAccountId, setFromAccountId] = useState<number | null>();
@@ -107,9 +109,8 @@ const TransferModal: React.FC<TransferModalProps> = ({
     }
   };
 
-  const availableToAccounts = accounts.filter(
-    (acc) => acc.id !== fromAccountId
-  );
+  const availableToAccounts =
+    allAccounts?.filter((acc) => acc.id !== fromAccountId) || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
