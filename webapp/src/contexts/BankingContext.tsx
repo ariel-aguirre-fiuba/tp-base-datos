@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Account, Transaction } from "../types/banking";
 import { useAuth } from "./AuthContext";
-import { getAccounts, getTransactions } from "@/helpers/api";
+import { getAccounts, getTransactions, transfer } from "@/helpers/api";
 
 interface BankingContextType {
   accounts: Account[];
@@ -12,7 +12,7 @@ interface BankingContextType {
     toAccountId: string,
     amount: number,
     description: string
-  ) => boolean;
+  ) => Promise<boolean>;
   getAccountBalance: (accountId: string) => number;
 }
 
@@ -35,7 +35,7 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
             type: acc.tipo_cuenta, // TODO Parsing
             balance: parseFloat(acc.saldo),
             accountNumber: acc.numero_cuenta,
-            nombre: acc.tipo_cuenta,
+            name: acc.numero_cuenta,
           })) || [];
         setAccounts(accountsData);
       });
@@ -76,13 +76,13 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
     setAccounts((prev) => [...prev, newAccount]);
   };
 
-  const transferMoney = (
+  const transferMoney = async (
     fromAccountId: string,
     toAccountId: string,
     amount: number,
     description: string
-  ): boolean => {
-    const fromAccount = accounts.find((acc) => acc.id === fromAccountId);
+  ) => {
+    const fromAccount = accounts.find((acc: any) => acc.id === +fromAccountId);
 
     if (!fromAccount || fromAccount.balance < amount || amount <= 0) {
       return false;
@@ -111,6 +111,12 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
       timestamp: new Date(),
       type: "transfer",
     };
+
+    const response = await transfer(amount, fromAccountId, toAccountId);
+
+    if (!response) {
+      return false;
+    }
 
     setTransactions((prev) => [newTransaction, ...prev]);
 

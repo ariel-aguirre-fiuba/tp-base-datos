@@ -50,7 +50,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
     }).format(amount);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -70,13 +70,13 @@ const TransferModal: React.FC<TransferModalProps> = ({
       return;
     }
 
-    const fromAccount = accounts.find((acc) => acc.id === fromAccountId);
+    const fromAccount = accounts.find((acc: any) => acc.id === +fromAccountId);
     if (!fromAccount || fromAccount.balance < amountNum) {
       setError("Saldo insuficiente");
       return;
     }
 
-    const success = transferMoney(
+    const success = await transferMoney(
       fromAccountId,
       toAccountId,
       amountNum,

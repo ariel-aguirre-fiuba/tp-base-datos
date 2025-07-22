@@ -75,3 +75,28 @@ export const registerUser = async (
     return null;
   }
 };
+
+export const transfer = async (
+  monto: number,
+  idCuentaOrigen: string,
+  idCuentaDestino: string
+) => {
+  try {
+    const response = await fetch(`${url}/transacciones/transferencia`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ monto, idCuentaOrigen, idCuentaDestino }),
+    });
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log(json);
+
+    return json;
+  } catch (error) {
+    console.error(error.message);
+    return null;
+  }
+};
