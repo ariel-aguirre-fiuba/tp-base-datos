@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Account, Transaction } from "../types/banking";
 import { useAuth } from "./AuthContext";
+import { getAccounts, getTransactions } from "@/helpers/api";
 
 interface BankingContextType {
   accounts: Account[];
@@ -17,65 +18,6 @@ interface BankingContextType {
 
 const BankingContext = createContext<BankingContextType | undefined>(undefined);
 
-// Mock accounts data
-const mockAccountsData: Account[] = [
-  {
-    id: "acc1",
-    userId: "1",
-    type: "checking",
-    balance: 15420.5,
-    accountNumber: "0001-2345-6789",
-    name: "Cuenta Corriente Principal",
-  },
-  {
-    id: "acc2",
-    userId: "1",
-    type: "savings",
-    balance: 25000.0,
-    accountNumber: "0001-2345-6790",
-    name: "Caja de Ahorro",
-  },
-  {
-    id: "acc3",
-    userId: "2",
-    type: "checking",
-    balance: 8750.25,
-    accountNumber: "0002-2345-6789",
-    name: "Cuenta Corriente Principal",
-  },
-];
-
-// Mock transactions data
-const mockTransactionsData: Transaction[] = [
-  {
-    id: "tx1",
-    fromAccountId: "acc1",
-    toAccountId: "acc2",
-    amount: 500.0,
-    description: "Transferencia para ahorros",
-    timestamp: new Date("2024-06-20T10:30:00"),
-    type: "transfer",
-  },
-  {
-    id: "tx2",
-    fromAccountId: "acc2",
-    toAccountId: "acc1",
-    amount: 200.0,
-    description: "Retiro para gastos",
-    timestamp: new Date("2024-06-19T14:15:00"),
-    type: "transfer",
-  },
-  {
-    id: "tx3",
-    fromAccountId: "acc1",
-    toAccountId: "acc3",
-    amount: 750.0,
-    description: "Pago de servicios",
-    timestamp: new Date("2024-06-18T09:45:00"),
-    type: "transfer",
-  },
-];
-
 export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -86,16 +28,31 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (user) {
       // Load user's accounts and transactions
-      const userAccounts = mockAccountsData.filter(
-        (acc) => acc.userId === user.id
-      );
-      const userTransactions = mockTransactionsData.filter((tx) =>
-        userAccounts.some(
-          (acc) => acc.id === tx.fromAccountId || acc.id === tx.toAccountId
-        )
-      );
-      setAccounts(userAccounts);
-      setTransactions(userTransactions);
+      getAccounts(user.id).then((accounts) => {
+        const accountsData =
+          accounts?.map((acc: any) => ({
+            id: acc.id_cuenta,
+            type: acc.tipo_cuenta, // TODO Parsing
+            balance: parseFloat(acc.saldo),
+            accountNumber: acc.numero_cuenta,
+            nombre: acc.tipo_cuenta,
+          })) || [];
+        setAccounts(accountsData);
+      });
+
+      getTransactions(user.id).then((txs) => {
+        const transactionsData =
+          txs?.map((tx: any) => ({
+            id: tx.id_transaccion,
+            amount: tx.monto,
+            type: tx.tipo_transaccion, // TODO Parsing
+            timestamp: new Date(tx.fecha_hora),
+            fromAccountId: tx.cuenta_origen_numero,
+            toAccountId: tx.cuenta_destino_numero,
+          })) || [];
+
+        setTransactions(transactionsData);
+      });
     } else {
       setAccounts([]);
       setTransactions([]);
@@ -117,7 +74,6 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     setAccounts((prev) => [...prev, newAccount]);
-    mockAccountsData.push(newAccount);
   };
 
   const transferMoney = (
@@ -157,7 +113,6 @@ export const BankingProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     setTransactions((prev) => [newTransaction, ...prev]);
-    mockTransactionsData.unshift(newTransaction);
 
     return true;
   };

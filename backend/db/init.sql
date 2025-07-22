@@ -51,9 +51,9 @@ CREATE TABLE Transaccion (
 
 -- Insertar datos de ejemplo para usuarios
 INSERT INTO Usuario (nombre, apellido, dni, direccion, telefono, email, fecha_nacimiento) VALUES
-('Juan', 'Pérez', '12345678', 'Av. Siempreviva 123, Springfield', '1123456789', 'juan.perez@example.com', '1990-01-15'),
-('Ana', 'García', '87654321', 'Calle Falsa 456, Capital', '1198765432', 'ana.garcia@example.com', '1985-07-20'),
-('Carlos', 'Rodríguez', '99887766', 'Bv. del Sol 789, Gran Buenos Aires', '1155443322', 'carlos.r@example.com', '1978-03-01');
+('Juan', 'Pérez', '12345678', 'Av. Siempreviva 123, Springfield', '1123456789', 'juan.perez@fi.uba.ar', '1990-01-15'),
+('Ana', 'García', '87654321', 'Calle Falsa 456, Capital', '1198765432', 'ana.garcia@fi.uba.ar', '1985-07-20'),
+('Carlos', 'Rodríguez', '99887766', 'Bv. del Sol 789, Gran Buenos Aires', '1155443322', 'carlos.r@fi.uba.ar', '1978-03-01');
 
 -- Insertar datos de ejemplo para cuentas
 -- Asegúrate de que los id_usuario existan de los inserts anteriores

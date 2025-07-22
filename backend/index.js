@@ -1,5 +1,6 @@
 import { Client } from "pg";
 import express from "express";
+import cors from "cors";
 import "dotenv/config";
 
 const client = new Client({
@@ -14,6 +15,7 @@ await client.connect();
 const port = 3000;
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const PREFIX = "/api";
 
@@ -21,23 +23,29 @@ const PREFIX = "/api";
 
 // Crear un nuevo usuario
 app.post(`${PREFIX}/usuarios`, async (req, res) => {
-  const { nombre, apellido, dni, direccion, telefono, email, fechaNacimiento } =
-    req.body;
-  if (
-    !nombre ||
-    !apellido ||
-    !dni ||
-    !direccion ||
-    !telefono ||
-    !email ||
-    !fechaNacimiento
-  ) {
+  const { nombre, apellido, email } = req.body;
+  if (!nombre || !apellido || !email) {
     res.status(400).send("Parámetros inválidos");
     return;
   }
+  const mockDni = Math.floor(Math.random() * 100000000)
+    .toString()
+    .padStart(8, "0");
+  const mockDireccion = "Calle Falsa 123";
+  const mockTelefono = "1234-9876";
+  const mockFechaNacimiento = "2025-07-23";
+
   const queryResponse = await client.query(
     "INSERT INTO Usuario (nombre, apellido, dni, direccion, telefono, email, fecha_nacimiento) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-    [nombre, apellido, dni, direccion, telefono, email, fechaNacimiento]
+    [
+      nombre,
+      apellido,
+      mockDni,
+      mockDireccion,
+      mockTelefono,
+      email,
+      mockFechaNacimiento,
+    ]
   );
   res.status(200).send(queryResponse.rows);
 });
@@ -116,6 +124,19 @@ app.post(`${PREFIX}/transacciones/transferencia`, async (req, res) => {
 });
 
 // 2. LECTURA DE DATOS
+
+// Obtener todos los datos de unario por su email
+app.get(`${PREFIX}/login/:email`, async (req, res) => {
+  const queryResponse = await client.query(
+    "SELECT id_usuario, nombre, apellido, dni, direccion, telefono, email, fecha_nacimiento FROM Usuario WHERE email = $1",
+    [req.params.email]
+  );
+  if (queryResponse.rows.length < 1) {
+    res.status(404).send("Usuario no encontrado");
+    return;
+  }
+  res.status(200).send(queryResponse.rows);
+});
 
 // Obtener todos los datos de unario por su DNI
 app.get(`${PREFIX}/usuarios/:dni`, async (req, res) => {
